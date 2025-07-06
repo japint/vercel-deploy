@@ -1,6 +1,5 @@
 "use client";
 
-import Head from "next/head";
 import { useRouter } from "next/navigation";
 import { PartyTypeStep } from "../components/form/steps/PartTypeStep";
 import { BasicDetailsStep } from "../components/form/steps/BasicDetailsStep";
@@ -14,7 +13,22 @@ import { Button } from "../components/ui/Button";
 import { FormData } from "../types/form";
 import { useState } from "react";
 
-const STEPS = [
+interface FormStep {
+  id: number;
+  name: string;
+  component: React.ComponentType<{
+    formData: FormData;
+    handleChange: (
+      e: React.ChangeEvent<
+        HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+      >
+    ) => void;
+    handleCheckboxChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    serverErrors: Record<string, string | string[] | undefined>;
+  }>;
+}
+
+const STEPS: FormStep[] = [
   { id: 1, name: "Event Type", component: PartyTypeStep },
   { id: 2, name: "Basic Details", component: BasicDetailsStep },
   { id: 3, name: "Style Preferences", component: StylePreferencesStep },
@@ -56,10 +70,9 @@ export default function Home() {
     privacy: "public",
   });
 
-  interface ServerErrors {
-    [key: string]: string | string[] | undefined;
-  }
-  const [serverErrors] = useState<ServerErrors>({});
+  const [serverErrors] = useState<
+    Record<string, string | string[] | undefined>
+  >({});
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -111,15 +124,12 @@ export default function Home() {
   const handleSubmit = async () => {
     try {
       setIsSubmitting(true);
-
-      // 1. Validate environment
       const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
+
       if (!siteKey) {
-        console.error("reCAPTCHA site key missing");
         throw new Error("Configuration error. Please contact support.");
       }
 
-      // 2. Check reCAPTCHA availability with retry logic
       let retryCount = 0;
       const maxRetries = 3;
 
@@ -130,8 +140,6 @@ export default function Home() {
         ) {
           break;
         }
-
-        console.log(`Waiting for reCAPTCHA... (attempt ${retryCount + 1})`);
         await new Promise((resolve) => setTimeout(resolve, 1000));
         retryCount++;
       }
@@ -145,29 +153,19 @@ export default function Home() {
         );
       }
 
-      console.log("Executing reCAPTCHA with site key:", siteKey);
-
-      // 3. Get reCAPTCHA token with proper error handling
       const token = await new Promise<string>((resolve, reject) => {
         window.grecaptcha.ready(() => {
-          // Add a small delay to ensure everything is properly initialized
           setTimeout(() => {
             window.grecaptcha
               .execute(siteKey, { action: "submit_form" })
               .then((token: string) => {
-                console.log("reCAPTCHA token received:", {
-                  hasToken: !!token,
-                  tokenLength: token?.length,
-                  tokenStart: token?.substring(0, 20) + "...",
-                });
-
                 if (!token || token.length < 20) {
                   reject(new Error("Invalid reCAPTCHA token received"));
                 } else {
                   resolve(token);
                 }
               })
-              .catch((error: any) => {
+              .catch((error: Error) => {
                 console.error("reCAPTCHA execute error:", error);
                 reject(new Error("Failed to complete security verification"));
               });
@@ -175,9 +173,6 @@ export default function Home() {
         });
       });
 
-      console.log("Submitting form with token...");
-
-      // 4. Make the API request
       const response = await fetch("/api/submit", {
         method: "POST",
         headers: {
@@ -187,30 +182,16 @@ export default function Home() {
         body: JSON.stringify({ ...formData, recaptchaToken: token }),
       });
 
-      // Handle 405 specifically
       if (response.status === 405) {
         throw new Error(
           "Form submission is currently unavailable. Please try again later."
         );
       }
 
-      // 5. Handle response
       const responseText = await response.text();
-      let result;
-      try {
-        result = responseText ? JSON.parse(responseText) : {};
-      } catch (e) {
-        console.error("Failed to parse JSON:", responseText);
-        throw new Error("Server returned invalid response");
-      }
+      const result = responseText ? JSON.parse(responseText) : {};
 
-      // 6. Check for errors
       if (!response.ok) {
-        console.error("Server error:", {
-          status: response.status,
-          result: result,
-        });
-
         throw new Error(
           result.error ||
             result.message ||
@@ -218,16 +199,14 @@ export default function Home() {
         );
       }
 
-      // 7. Success!
-      console.log("Form submitted successfully");
       router.push("/success");
-    } catch (error: unknown) {
+    } catch (error) {
       console.error("Submission error:", error);
-      alert(
-        error instanceof Error && error.message
+      const message =
+        error instanceof Error
           ? error.message
-          : "Failed to submit form. Please check your connection and try again."
-      );
+          : "Failed to submit form. Please check your connection and try again.";
+      alert(message);
     } finally {
       setIsSubmitting(false);
     }
@@ -237,11 +216,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 to-gray-50">
-      <Head>
-        <title>Create Your Event Website</title>
-        <meta name="description" content="Design your perfect event website" />
-      </Head>
-
       <main className="container mx-auto py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
           <div className="bg-primary-100 p-6 text-gray-900">
