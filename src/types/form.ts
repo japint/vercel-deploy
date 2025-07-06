@@ -49,5 +49,14 @@ export interface FormData {
 export type FormStep = {
   id: number;
   name: string;
-  component: React.ComponentType<any>;
+  component: React.ComponentType<{
+    formData: FormData;
+    handleChange: (
+      e: React.ChangeEvent<
+        HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+      >
+    ) => void;
+    handleCheckboxChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    serverErrors: Record<string, string | string[] | undefined>;
+  }>;
 };
