@@ -5,10 +5,12 @@ import { EVENT_OPTIONS } from "../../../constants/form";
 type Props = {
   formData: FormData;
   handleChange: (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
   ) => void;
   handleCheckboxChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  serverErrors?: { [key: string]: string };
+  serverErrors?: Record<string, string | string[] | undefined>;
 };
 
 export const BasicDetailsStep: React.FC<Props> = ({
@@ -17,7 +19,7 @@ export const BasicDetailsStep: React.FC<Props> = ({
   handleCheckboxChange,
   serverErrors = {},
 }) => {
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const getNamesLabel = () => {
     switch (formData.partyType) {
@@ -34,7 +36,7 @@ export const BasicDetailsStep: React.FC<Props> = ({
 
   // Client-side validation function
   const validate = () => {
-    const newErrors: { [key: string]: string } = {};
+    const newErrors: Record<string, string> = {};
     if (!formData.names.trim()) newErrors.names = "This field is required.";
     if (!formData.date) newErrors.date = "Please select a date.";
     if (!formData.time) newErrors.time = "Please select a time.";
@@ -47,8 +49,23 @@ export const BasicDetailsStep: React.FC<Props> = ({
     return Object.keys(newErrors).length === 0;
   };
 
+  // Normalize server errors to string format
+  const normalizeErrors = (
+    errs: Record<string, string | string[] | undefined>
+  ) => {
+    return Object.entries(errs).reduce((acc, [key, value]) => {
+      if (value) {
+        acc[key] = Array.isArray(value) ? value.join(", ") : value;
+      }
+      return acc;
+    }, {} as Record<string, string>);
+  };
+
   // Merge client and server errors for display
-  const mergedErrors = { ...errors, ...serverErrors };
+  const mergedErrors = {
+    ...errors,
+    ...normalizeErrors(serverErrors),
+  };
 
   return (
     <div className="flex flex-col gap-6">
