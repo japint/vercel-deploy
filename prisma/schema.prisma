@@ -14,10 +14,32 @@ datasource db {
   directUrl = env("POSTGRES_URL_NON_POOLING")
 }
 
-model Post {
-  id        String   @id @default(cuid())
-  title     String
-  content   String
-  CreatedAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model EventSubmission {
+  id                  String   @id @default(cuid())
+  partyType           String
+  names               String
+  date                DateTime
+  time                String?
+  venue               String?
+  venueAddress        String?
+  events              String[]
+  theme               String?
+  colors              String?
+  fonts               String?
+  mainMessage         String?
+  countdown           Boolean
+  hasPhotos           Boolean
+  backgroundMedia     String?
+  backgroundMediaType String
+  music               Boolean
+  rsvp                Boolean
+  rsvpFields          String[]
+  rsvpDestination     String
+  registryLink        String?
+  accommodationInfo   String?
+  dressCode           String?
+  faq                 String?
+  customDomain        String?
+  privacy             String
+  createdAt           DateTime @default(now())
 }
