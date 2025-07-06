@@ -133,21 +133,16 @@ export default function Home() {
       let retryCount = 0;
       const maxRetries = 3;
 
+      // Wait for reCAPTCHA to load
       while (retryCount < maxRetries) {
-        if (
-          typeof window.grecaptcha !== "undefined" &&
-          window.grecaptcha.ready
-        ) {
+        if (typeof window !== "undefined" && "grecaptcha" in window) {
           break;
         }
         await new Promise((resolve) => setTimeout(resolve, 1000));
         retryCount++;
       }
 
-      if (
-        typeof window.grecaptcha === "undefined" ||
-        !window.grecaptcha.ready
-      ) {
+      if (typeof window === "undefined" || !("grecaptcha" in window)) {
         throw new Error(
           "Security service unavailable. Please refresh the page and try again."
         );
