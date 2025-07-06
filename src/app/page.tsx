@@ -56,7 +56,10 @@ export default function Home() {
     privacy: "public",
   });
 
-  const [serverErrors, setServerErrors] = useState<any>({});
+  interface ServerErrors {
+    [key: string]: string | string[] | undefined;
+  }
+  const [serverErrors] = useState<ServerErrors>({});
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -76,17 +79,18 @@ export default function Home() {
     const { name, value, checked } = e.target;
 
     setFormData((prev) => {
+      const currentValue = prev[name as keyof FormData];
+      const arrayValue = Array.isArray(currentValue) ? currentValue : [];
+
       if (checked) {
         return {
           ...prev,
-          [name]: [...(prev[name as keyof FormData] as string[]), value],
+          [name]: [...arrayValue, value],
         };
       } else {
         return {
           ...prev,
-          [name]: (prev[name as keyof FormData] as string[]).filter(
-            (item) => item !== value
-          ),
+          [name]: arrayValue.filter((item) => item !== value),
         };
       }
     });
@@ -217,11 +221,12 @@ export default function Home() {
       // 7. Success!
       console.log("Form submitted successfully");
       router.push("/success");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Submission error:", error);
       alert(
-        error.message ||
-          "Failed to submit form. Please check your connection and try again."
+        error instanceof Error && error.message
+          ? error.message
+          : "Failed to submit form. Please check your connection and try again."
       );
     } finally {
       setIsSubmitting(false);
