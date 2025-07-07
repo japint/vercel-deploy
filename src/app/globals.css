@@ -2,25 +2,77 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --foreground: #000000; /* Pure black for text */
+  --input-text: #000000;
+  --input-placeholder: #6b7280; /* gray-500 */
+  --input-background: #ffffff; /* Always white background */
+  --input-border: #d1d5db; /* gray-300 */
+  --textarea-background: #ffffff; /* Specific white background for textarea */
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
-    --foreground: #ededed;
+    --foreground: #000000; /* Keep text black in dark mode too */
+    --input-text: #000000;
+    --input-placeholder: #6b7280; /* Same gray as light mode */
+    --input-background: #ffffff;
+    --input-border: #d1d5db;
+    --textarea-background: #ffffff;
   }
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  scroll-behavior: smooth;
+}
+
+/* Input elements styling */
+input,
+select {
+  color: var(--input-text) !important;
+  background-color: var(--input-background) !important;
+  border-color: var(--input-border) !important;
+}
+
+/* Textarea specific styling - always white background */
+textarea {
+  color: var(--input-text) !important;
+  background-color: var(--textarea-background) !important;
+  border-color: var(--input-border) !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--input-placeholder) !important;
+  opacity: 1 !important;
+}
+
+/* Select dropdown styling */
+select,
+option {
+  color: var(--input-text) !important;
+  background-color: var(--input-background) !important;
+}
+
+.custom-select-option {
+  color: var(--input-text) !important;
+  background-color: var(--input-background) !important;
+}
+
+.custom-select-option:hover,
+.custom-select-option:focus {
+  background-color: #bfdbfe !important;
+  color: #1e3a8a !important;
+}
+
+/* Checkbox styling */
+.checkbox-label {
+  color: var(--foreground) !important;
 }
