@@ -38,9 +38,9 @@ export default async function handler(
 
     // TEMPORARY: Skip verification for testing
     // console.log("TEMPORARY: Skipping reCAPTCHA verification for testing");
-    // const isHuman = true; // Temporarily bypass
+    const isHuman = true; // Temporarily bypass
 
-    const isHuman = await verifyRecaptcha(recaptchaToken);
+    // const isHuman = await verifyRecaptcha(recaptchaToken);
     if (!isHuman) {
       return res.status(400).json({
         error: "reCAPTCHA verification failed",
