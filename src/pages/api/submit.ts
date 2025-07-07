@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import nodemailer from "nodemailer";
 import { prisma } from "@/lib/prisma";
-import { verifyRecaptcha } from "@/lib/recaptcha";
+// import { verifyRecaptcha } from "@/lib/recaptcha";
 
 export default async function handler(
   req: NextApiRequest,
